@@ -16,9 +16,9 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-purple-100">
+    <div className="min-h-screen flex items-center justify-center bg-purple-100 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-xl">
-        <h2 className="text-4xl font-bold text-purple-600 text-center mb-6">Login</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-purple-600 text-center mb-6">Login</h2>
 
         <input
           type="email"
