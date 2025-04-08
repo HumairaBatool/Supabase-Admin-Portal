@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { TextField,Button,Box,Typography,Paper,MenuItem,Select,InputLabel,FormControl,} from '@mui/material';
 import { supabase } from '../supabase/client';
 
 const ContentForm = () => {
@@ -28,119 +27,129 @@ const ContentForm = () => {
 
   // Update form when selected item changes
   useEffect(() => {
-    const selected = contents.find((item) => item.id === selectedId);
+    const selected = contents.find((item) => item.id === Number(selectedId));
     if (selected) {
       setFormValues(selected);
     }
   }, [selectedId, contents]);
-
+  
   const handleChange = (e) => {
     setFormValues({ ...formValues, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formValues) {
+      console.error('No form values to submit');
+      return;
+    }
     setLoading(true);
 
-    const original = contents.find((item) => item.id === selectedId);
+    const original = contents.find((item) => item.id === Number(selectedId));
     const now = new Date().toISOString();
 
     const updates = {
-      id: selectedId,
+      id:  Number(selectedId),
     };
 
     if (formValues.title !== original.title) {
       updates.title = formValues.title;
       updates.titleUpdatedAt = now;
     }
-
     if (formValues.description !== original.description) {
       updates.description = formValues.description;
       updates.descriptionUpdatedAt = now;
     }
-
-    const { error } = await supabase
-      .from('content')
-      .update(updates)
-      .eq('id', selectedId);
-
+    const { error } = await supabase.from('content').update(updates).eq('id',  Number(selectedId));
     if (error) {
       console.error('Update error:', error.message);
     } else {
       await fetchContent();
     }
-
     setLoading(false);
   };
 
   return (
-    <Paper elevation={3} sx={{ padding: 4, maxWidth: 700, margin: '2rem auto' }}>
-      <Typography variant="h5" gutterBottom>
-        Admin Content Manager
-      </Typography>
+    <div className="min-h-screen bg-purple-100 flex justify-center items-center p-4">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-3xl">
+        <h2 className="text-3xl font-bold text-purple-600 mb-6 text-center">
+          Admin Content Manager
+        </h2>
 
-      {contents.length > 0 ? (
-        <>
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel>Select Content Record</InputLabel>
-            <Select
+        {contents.length > 0 ? (
+          <>
+            <label className="block mb-2 text-purple-900 font-medium">
+              Select Content Record
+            </label>
+            <select
               value={selectedId}
-              label="Select Content Record"
               onChange={(e) => setSelectedId(e.target.value)}
+              className="w-full mb-6 p-2 border border-purple-300 rounded-md focus:ring-2 focus:ring-purple-400"
             >
               {contents.map((item) => (
-                <MenuItem key={item.id} value={item.id}>
+                <option key={item.id} value={item.id}>
                   Content: {item.id}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
-          </FormControl>
+            </select>
 
-          <Box display="flex" flexDirection="column" gap={2}>
-            <TextField
-              label="Title"
-              name="title"
-              value={formValues.title}
-              onChange={handleChange}
-              fullWidth
-            />
-            <Typography variant="body2" color="text.secondary">
-              Title Last Updated:{' '}
-              {formValues.titleUpdatedAt
-                ? new Date(formValues.titleUpdatedAt).toLocaleString()
-                : 'N/A'}
-            </Typography>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formValues.title}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border border-purple-300 rounded-md "
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Title Last Updated:{' '}
+                  {formValues.titleUpdatedAt
+                    ? new Date(formValues.titleUpdatedAt).toLocaleString()
+                    : 'N/A'}
+                </p>
+              </div>
 
-            <TextField
-              label="Description"
-              name="description"
-              multiline
-              rows={4}
-              value={formValues.description}
-              onChange={handleChange}
-              fullWidth
-            />
-            <Typography variant="body2" color="text.secondary">
-              Description Last Updated:{' '}
-              {formValues.descriptionUpdatedAt
-                ? new Date(formValues.descriptionUpdatedAt).toLocaleString()
-                : 'N/A'}
-            </Typography>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <textarea
+                  name="description"
+                  rows={4}
+                  value={formValues.description}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border border-purple-300 rounded-md "
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Description Last Updated:{' '}
+                  {formValues.descriptionUpdatedAt
+                    ? new Date(formValues.descriptionUpdatedAt).toLocaleString()
+                    : 'N/A'}
+                </p>
+              </div>
 
-            <Button
-              variant="contained"
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? 'Saving...' : 'Save Changes'}
-            </Button>
-            <Button onClick={() => supabase.auth.signOut()}>Logout</Button>
-
-          </Box>
-        </>
-      ) : (
-        <Typography>No content found in Supabase.</Typography>
-      )}
-    </Paper>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="bg-purple-500 hover:bg-purple-600 text-white font-semibold px-6 py-2 rounded-md transition duration-200"
+                >
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  onClick={() => supabase.auth.signOut()}
+                  className="bg-red-400 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-md"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <p className="text-center text-gray-600">No content found in Supabase.</p>
+        )}
+      </div>
+    </div>
   );
 };
 
