@@ -23,6 +23,7 @@ const ContentForm = () => {
 
   useEffect(() => {
     fetchContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update form when selected item changes
